@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eleva Fitness | Move Better. Feel Stronger.</title>
-<meta name="description" content="Train, recover and feel your best at Eleva Fitness in Westlands, Nairobi. Explore our gym, group classes, physiotherapy and whole-person wellness services.">
+<title>ELEVA FITNESS — A Healthy Mind in a Healthy Body</title>
+<meta name="description" content="Eleva Fitness: physiotherapy, gym, aerobics, chiropractic care, nutrition support, psychology and 11 massage therapies in Nairobi, Kenya.">
 <link rel="stylesheet" href="css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
 </head>
@@ -14,18 +14,21 @@
 <header class="site-header" id="top">
   <nav class="navbar">
     <a href="#home" class="brand">
-      <span class="brand-mark" aria-hidden="true">E</span>
+      <span class="brand-mark">EF</span>
       <span class="brand-text">ELEVA <em>FITNESS</em></span>
     </a>
-    <button class="nav-toggle" id="navToggle" type="button" aria-label="Open navigation menu" aria-controls="navTabs" aria-expanded="false">☰</button>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
     <ul class="nav-tabs" id="navTabs">
-      <li><a href="#services" class="tab active">Services</a></li>
-      <li><a href="#times" class="tab">Schedule</a></li>
-      <li><a href="#team" class="tab">Our team</a></li>
+      <li><a href="#home" class="tab active">Home</a></li>
+      <li><a href="#services" class="tab">Services &amp; Prices</a></li>
+      <li><a href="#schedule" class="tab">Daily Specialists</a></li>
+      <li><a href="#timetable" class="tab">Timetable</a></li>
+      <li><a href="#promos" class="tab">Promos 🎉</a></li>
+      <li><a href="#bookings" class="tab">Bookings</a></li>
+      <li><a href="#team" class="tab">Our Team</a></li>
       <li><a href="#reviews" class="tab">Reviews</a></li>
-      <li><a href="#location" class="tab">Visit us</a></li>
+      <li><a href="#location" class="tab">Location</a></li>
     </ul>
-    <a href="#bookings" class="btn btn-small nav-cta">Book a visit <span aria-hidden="true">↗</span></a>
   </nav>
 </header>
 
@@ -33,39 +36,14 @@
 <section class="hero" id="home">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <p class="hero-kicker"><span aria-hidden="true">✳</span> Your wellness, elevated</p>
-    <h1>Move better.<br><span>Feel stronger.</span></h1>
-    <p class="slogan">A healthy mind in a healthy body.</p>
-    <p class="hero-sub">A brighter, more balanced you starts here. Train, recover and find your rhythm with a team that sees the whole you.</p>
+    <p class="hero-kicker">Nairobi's Home of Total Wellness</p>
+    <h1>ELEVA <span>FITNESS</span></h1>
+    <p class="slogan">“A Healthy Mind in a Healthy Body”</p>
+    <p class="hero-sub">Physiotherapy · Gym · Aerobics · Chiropractic Care · Nutrition · Psychology · Massage Therapy — all under one roof.</p>
     <div class="hero-cta">
-      <a href="#bookings" class="btn btn-yellow">Find your starting point <span aria-hidden="true">↗</span></a>
-      <a href="#services" class="btn btn-ghost">Explore our services</a>
+      <a href="#bookings" class="btn btn-yellow">Book a Session</a>
+      <a href="#services" class="btn btn-ghost">View Prices (Ksh)</a>
     </div>
-    <div class="hero-note"><span class="hero-note-mark" aria-hidden="true">✦</span> One welcoming space. A whole lot of ways to feel good.</div>
-  </div>
-</section>
-
-<!-- ============ INTRODUCTION ============ -->
-<section class="intro-section" aria-labelledby="introTitle">
-  <div class="intro-copy">
-    <p class="eyebrow">Wellness that works together</p>
-    <h2 id="introTitle">Your whole self.<br><span>In good hands.</span></h2>
-    <p>From your first workout to your next recovery session, our people and programs come together around what you need to feel your best.</p>
-    <a href="#team" class="text-link">Get to know our team <span aria-hidden="true">→</span></a>
-  </div>
-  <div class="intro-points">
-    <article class="intro-point">
-      <span class="intro-number">01</span>
-      <div><h3>Move with purpose</h3><p>Gym training and group classes for every pace and starting point.</p></div>
-    </article>
-    <article class="intro-point">
-      <span class="intro-number">02</span>
-      <div><h3>Recover with care</h3><p>Thoughtful support to help you restore mobility and build confidence.</p></div>
-    </article>
-    <article class="intro-point">
-      <span class="intro-number">03</span>
-      <div><h3>Feel good, every day</h3><p>Personal wellness services that support your mind as well as your body.</p></div>
-    </article>
   </div>
 </section>
 
@@ -218,6 +196,39 @@
   <div class="grid cards-3" id="specialistGrid"></div>
 </section>
 
+<!-- ============ PROFESSIONAL TIMETABLE ============ -->
+<section class="section" id="timetable">
+  <div class="section-head">
+    <h2>Professional Timetable</h2>
+    <p>See exactly who works on which day and at what time — then book straight into a free slot.</p>
+  </div>
+  <div class="schedule-controls">
+    <label for="ttService">Service:</label>
+    <select id="ttService" class="tt-select">
+      <option>Gym</option>
+      <option>Aerobics</option>
+      <option>Physiotherapy</option>
+      <option>Chiropractic Treatment</option>
+      <option>Nutrition Support</option>
+      <option>Psychology</option>
+      <option>Massage Therapy (all types)</option>
+    </select>
+  </div>
+  <div class="tt-wrap">
+    <table class="tt-table" id="ttTable"></table>
+  </div>
+  <p class="day-note">🕒 Gym &amp; aerobics trainers cover the daily sessions (🌅 5–8 AM · 🌞 12–2 PM · 🌆 6–10 PM), while clinic professionals take hourly appointments. Greyed cells are their off days.</p>
+</section>
+
+<!-- ============ PROMO DAYS ============ -->
+<section class="section section-alt" id="promos">
+  <div class="section-head">
+    <h2>Promotional Days 🎉</h2>
+    <p>Every week we cut prices on selected services. Book on a promo day and the discount is applied automatically at the desk.</p>
+  </div>
+  <div class="grid cards-3" id="promoGrid"></div>
+</section>
+
 <!-- ============ BOOKINGS ============ -->
 <section class="section section-alt" id="bookings">
   <div class="section-head">
@@ -265,7 +276,7 @@
             <optgroup label="Clinic Hours">
               <option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option>
               <option>11:00 AM</option><option>12:00 PM</option><option>2:00 PM</option>
-              <option>3:00 PM</option><option>4:00 PM</option><option>5:00 PM</option>
+              <option>3:00 PM</option><option>4:00 PM</option><option>5:00 PM</option><option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option>
             </optgroup>
           </select>
         </div>
@@ -275,9 +286,14 @@
         <select id="bkSpecialist"><option value="">No preference — assign me the best available</option></select>
       </div>
       <div class="form-group">
+        <label>Live Availability — who's free on your date</label>
+        <div id="availPanel" class="avail-panel"><p class="muted">Choose a service and a date above to see available professionals and their free time slots.</p></div>
+      </div>
+      <div class="form-group">
         <label for="bkNotes">Notes (injuries, goals, requests…)</label>
         <textarea id="bkNotes" rows="3" placeholder="Tell us anything that helps us serve you better"></textarea>
       </div>
+      <div id="promoNotice"></div>
       <button type="submit" class="btn btn-yellow btn-big">Confirm Booking Request</button>
       <p class="form-hint">🔒 Your details stay on this device (saved in your browser) and are only used to arrange your visit.</p>
     </form>

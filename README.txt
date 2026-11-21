@@ -39,3 +39,18 @@ TO PUT IT ONLINE (free options)
 NOTE: Social media links currently point to placeholder handles
 (facebook.com/elevafitness etc.) — update them to your real pages
 in index.html (search for "facebook.com/elevafitness").
+
+NEW IN THIS VERSION
+-------------------
+* Professional Timetable tab — a full Mon–Sun roster per service:
+  every doctor, therapist and trainer with their exact working hours
+  (trainers shown against the 5–8 AM / 12–2 PM / 6–10 PM sessions).
+* Live availability in the booking form — pick a service + date and
+  see each available professional with clickable free time slots;
+  taken slots show as "Booked". Clicking a slot auto-fills the
+  specialist and time. (Demo data: ~30% of slots appear taken.)
+* Promotional Days section — weekly discounted days (Massage Monday
+  −15%, Wellness Wednesday −20%, Fitness Friday −25%, Spa Saturday
+  −30%, Community Sunday −20%). Booking on a promo date shows the
+  discounted price estimate automatically; each promo card has a
+  "Book this promo day" button that pre-fills the date.

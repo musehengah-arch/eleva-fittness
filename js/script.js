@@ -93,17 +93,9 @@ const AV_COLORS = [["#6d28d9","#f7c948"],["#1d6fe0","#6d28d9"],["#f7c948","#1d6f
 
 /* ---------- Nav tabs ---------- */
 const navToggle = $("#navToggle"), navTabs = $("#navTabs");
-navToggle.addEventListener("click", () => {
-  const isOpen = navTabs.classList.toggle("open");
-  navToggle.setAttribute("aria-expanded", String(isOpen));
-  navToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
-});
+navToggle.addEventListener("click", () => navTabs.classList.toggle("open"));
 navTabs.addEventListener("click", e => {
-  if (e.target.classList.contains("tab")) {
-    navTabs.classList.remove("open");
-    navToggle.setAttribute("aria-expanded", "false");
-    navToggle.setAttribute("aria-label", "Open navigation menu");
-  }
+  if (e.target.classList.contains("tab")) navTabs.classList.remove("open");
 });
 const tabLinks = $$(".tab");
 const sections = [...tabLinks].map(a => $(a.getAttribute("href"))).filter(Boolean);
@@ -297,3 +289,172 @@ $("#reviewForm").addEventListener("submit", e => {
   setTimeout(() => msg.textContent = "", 4000);
 });
 renderReviews();
+
+/* ============================================================
+   PROFESSIONAL TIMETABLE + LIVE AVAILABILITY + PROMO DAYS
+   ============================================================ */
+
+/* Weekly working schedule for every professional (dow: 0=Sun … 6=Sat) */
+const SCHEDULE = {
+  /* Gym & Aerobics trainers — cover daily sessions */
+  "Kevin Tuitoek":     { days:[1,2,3,4,5],   sessions:["morning","evening"] },
+  "Felix Odhiambo":    { days:[2,3,4,6],     sessions:["morning","evening"] },
+  "George Mbugua":     { days:[1,3,5,6],     sessions:["morning","noon","evening"] },
+  "Ruth Adisa":        { days:[2,4,5,0],     sessions:["noon","evening"] },
+  "Lucy Muthoni":      { days:[1,2,3,4,5],   sessions:["morning","noon"] },
+  "Sheila Barasa":     { days:[3,4,5,6],     sessions:["noon","evening"] },
+  /* Massage therapists */
+  "Joseph Maina":      { days:[1,2,3,4,5,6], from:8,  to:20 },
+  "Grace Kilonzo":     { days:[1,2,4,5,6],   from:9,  to:19 },
+  "Elijah Omondi":     { days:[2,3,4,5,6],   from:8,  to:18 },
+  "Pauline Njeri":     { days:[1,3,5,6],     from:9,  to:20 },
+  "Dennis Kariuki":    { days:[1,2,3,5,6],   from:10, to:18 },
+  "Amina Mohammed":    { days:[2,4,5,6,0],   from:8,  to:19 },
+  /* Doctors & clinicians */
+  "Dr. David Mwangi":  { days:[1,2,3,5,6],   from:8,  to:16 },
+  "Dr. Sarah Achieng'":{ days:[1,2,4,5,6],   from:9,  to:17 },
+  "Dr. Cynthia Kamau": { days:[2,3,4,5,6],   from:8,  to:16 },
+  "Dr. Brian Kiprop":  { days:[1,3,4,5,6],   from:8,  to:17 },
+  "Dr. James Olouch":  { days:[1,2,3,4,5],   from:10, to:18 },
+  "Dr. Mercy Chebet":  { days:[2,4,5,6,0],   from:9,  to:17 },
+  "Dr. Otieno Moraa":  { days:[1,2,3,4,5],   from:8,  to:16 },
+  "Ann Kiptoo":        { days:[1,3,4,5,6],   from:9,  to:17 },
+  "Samuel Ndung'u":    { days:[2,3,5,6],     from:8,  to:16 },
+  "Dr. Wanjiru Njoroge":{days:[1,2,3,4,5],   from:9,  to:17 },
+  "Kelvin Ochieng'":   { days:[2,3,4,5,6],   from:10, to:18 },
+  "Faith Wairimu":     { days:[1,4,5,6,0],   from:8,  to:16 },
+};
+
+const CLINIC_SLOTS = [["8:00 AM",8],["9:00 AM",9],["10:00 AM",10],["11:00 AM",11],["12:00 PM",12],
+                      ["2:00 PM",14],["3:00 PM",15],["4:00 PM",16],["5:00 PM",17],
+                      ["6:00 PM",18],["7:00 PM",19],["8:00 PM",20]];
+const SESSION_SLOTS = {
+  morning:["🌅 Morning 5–8 AM",  "Morning: 5:00 AM – 8:00 AM"],
+  noon:   ["🌞 Noon 12–2 PM",    "Noon: 12:00 PM – 2:00 PM"],
+  evening:["🌆 Evening 6–10 PM", "Evening: 6:00 PM – 10:00 PM"],
+};
+function hashStr(s){ let h=0; for (let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i)) >>> 0; } return h; }
+const slotTaken = (n,ds,t) => hashStr(n + "|" + ds + "|" + t) % 10 < 3;   // ~30% of slots already booked
+const to12h = h24 => { const ap = h24 >= 12 ? "PM" : "AM"; let h = h24 % 12; if (h === 0) h = 12; return `${h}:00 ${ap}`; };
+function poolFor(key){ return key.startsWith("Massage") ? SPECIALISTS["Massage — Swedish Massage"] : (SPECIALISTS[key] || []); }
+
+/* ---------- Professional Timetable ---------- */
+const ttService = $("#ttService"), ttTable = $("#ttTable");
+function renderTimetable(){
+  const pool = poolFor(ttService.value);
+  const todayCol = (new Date().getDay() + 6) % 7;               // Monday = 0
+  const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const head = `<thead><tr><th>Professional</th>${days.map((d,i) =>
+    `<th class="${i === todayCol ? "tt-today" : ""}">${d.slice(0,3)}${i === todayCol ? " •" : ""}</th>`).join("")}</tr></thead>`;
+  const rows = pool.map(p => {
+    const sch = SCHEDULE[p.name];
+    const cells = days.map((_, i) => {
+      const dow = (i + 1) % 7;
+      if (!sch || !sch.days.includes(dow)) return `<td class="tt-cell-off">—</td>`;
+      if (sch.sessions) return `<td class="tt-cell-on">${sch.sessions.map(s => SESSION_SLOTS[s][0].split(" ")[0]).join(" ")}</td>`;
+      return `<td class="tt-cell-on">${to12h(sch.from)} –<br>${to12h(sch.to)}</td>`;
+    }).join("");
+    return `<tr><td>${p.name}<br><small class="muted">${p.role}</small></td>${cells}</tr>`;
+  }).join("");
+  ttTable.innerHTML = head + "<tbody>" + rows + "</tbody>";
+}
+ttService.addEventListener("change", renderTimetable);
+renderTimetable();
+
+/* ---------- Live availability inside the booking form ---------- */
+const availPanel = $("#availPanel"), promoNotice = $("#promoNotice");
+
+function slotBtn(name, label, value, ds){
+  const taken = slotTaken(name, ds, value);
+  return `<button type="button" class="slot-btn${taken ? " booked" : ""}" ${taken ? "disabled" : ""} data-pro="${name}" data-time="${value}">${taken ? "Booked" : label}</button>`;
+}
+function updateAvailability(){
+  const svc = bkService.value, ds = $("#bkDate").value;
+  fillSpecialistOptions();
+  updatePromoNotice();
+  if (!svc || !ds){
+    availPanel.innerHTML = `<p class="muted">Choose a service and a date above to see available professionals and their free time slots.</p>`;
+    return;
+  }
+  const dow = new Date(ds + "T12:00:00").getDay();
+  const avail = poolFor(svc).filter(p => { const sch = SCHEDULE[p.name]; return sch && sch.days.includes(dow); });
+  const dateLabel = new Date(ds + "T12:00:00").toLocaleDateString("en-KE", { weekday:"long", day:"numeric", month:"long" });
+  if (!avail.length){
+    availPanel.innerHTML = `<p class="muted">😔 No professionals for <b>${svc}</b> on <b>${dateLabel}</b>. Please pick another date.</p>`;
+    return;
+  }
+  availPanel.innerHTML = avail.map((p, i) => {
+    const sch = SCHEDULE[p.name];
+    const slots = sch.sessions
+      ? sch.sessions.map(k => slotBtn(p.name, SESSION_SLOTS[k][0], SESSION_SLOTS[k][1], ds)).join("")
+      : CLINIC_SLOTS.filter(([, h]) => h >= sch.from && h < sch.to).map(([l]) => slotBtn(p.name, l, l, ds)).join("");
+    const hours = sch.sessions
+      ? sch.sessions.map(k => SESSION_SLOTS[k][0]).join("  ·  ")
+      : `${to12h(sch.from)} – ${to12h(sch.to)}`;
+    const c = AV_COLORS[(i + ds.length) % AV_COLORS.length];
+    return `<div class="avail-pro">
+      <div class="avail-pro-head">
+        <div class="avatar" style="--a:${c[0]};--b:${c[1]}">${initials(p.name)}</div>
+        <div><b>${p.name}</b> <small class="muted">· ${p.role}</small><br><small class="muted">🕒 ${hours}</small></div>
+      </div>
+      <div class="avail-slots">${slots}</div>
+    </div>`;
+  }).join("") + `<p class="muted" style="font-size:.8rem">Showing availability for <b>${svc}</b> on <b>${dateLabel}</b>. Greyed-out slots are already taken.</p>`;
+}
+availPanel.addEventListener("click", e => {
+  const b = e.target.closest(".slot-btn:not(.booked)");
+  if (!b) return;
+  $("#bkSpecialist").value = b.dataset.pro;
+  $("#bkTime").value = b.dataset.time;
+  availPanel.querySelectorAll(".slot-btn.sel").forEach(x => x.classList.remove("sel"));
+  b.classList.add("sel");
+});
+bkService.addEventListener("change", updateAvailability);
+$("#bkDate").addEventListener("change", updateAvailability);
+
+/* ---------- Promotional days ---------- */
+const PROMOS = [
+  { dow:1, emoji:"💆", name:"Massage Monday",     off:0.15, desc:"15% off ALL massage therapies — every Monday.", match:s => s.startsWith("Massage —") },
+  { dow:3, emoji:"🩺", name:"Wellness Wednesday", off:0.20, desc:"20% off all Physiotherapy & Chiropractic treatment sessions.", match:s => ["Physiotherapy","Chiropractic Treatment"].includes(s) },
+  { dow:5, emoji:"🏋️", name:"Fitness Friday",    off:0.25, desc:"25% off Gym day passes and Aerobics drop-in sessions.", match:s => ["Gym","Aerobics"].includes(s) },
+  { dow:6, emoji:"💑", name:"Spa Saturday",       off:0.30, desc:"30% off Reflexology and Couples Massages.", match:s => s === "Massage — Reflexology" },
+  { dow:0, emoji:"🥗", name:"Community Sunday",   off:0.20, desc:"Free 15-min health screening with any visit, plus 20% off Nutrition consults.", match:s => s === "Nutrition Support" },
+];
+function basePrice(s){
+  const m = MASSAGES.find(m => ("Massage — " + m.name) === s);
+  if (m) return parseInt(m.price.replace(/[^0-9]/g, ""));
+  return {"Gym":300, "Aerobics":400, "Physiotherapy":2000, "Chiropractic Treatment":2500, "Nutrition Support":2500, "Psychology":3000}[s] || 0;
+}
+function updatePromoNotice(){
+  const svc = bkService.value, ds = $("#bkDate").value;
+  const pr = (svc && ds) ? PROMOS.find(p => p.dow === new Date(ds + "T12:00:00").getDay() && p.match(svc)) : null;
+  if (!pr){ promoNotice.innerHTML = ""; return; }
+  const base = basePrice(svc), final = Math.round(base * (1 - pr.off));
+  promoNotice.innerHTML = `<div class="promo-notice">🎉 <b>${pr.name}!</b> ${pr.desc}
+    <span class="discount">Estimated price on this date: <s>Ksh ${base.toLocaleString()}</s> → Ksh ${final.toLocaleString()}</span></div>`;
+}
+function nextDate(dow){
+  const d = new Date();
+  d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7));
+  return d;
+}
+$("#promoGrid").innerHTML = PROMOS.map(p => {
+  const d = nextDate(p.dow), ds = d.toISOString().slice(0, 10);
+  return `<article class="card promo-card">
+    <span class="promo-emoji">${p.emoji}</span>
+    <span class="promo-badge">−${Math.round(p.off * 100)}%</span>
+    <h4>${p.name}</h4>
+    <p>${p.desc}</p>
+    <p class="promo-next">Next: <b>${d.toLocaleDateString("en-KE", { weekday:"long", day:"numeric", month:"long" })}</b></p>
+    <button class="btn btn-small promo-book" data-date="${ds}">Book this promo day</button>
+  </article>`;
+}).join("");
+document.addEventListener("click", e => {
+  const b = e.target.closest(".promo-book");
+  if (!b) return;
+  $("#bkDate").value = b.dataset.date;
+  updateAvailability();
+  document.getElementById("bookings").scrollIntoView({ behavior:"smooth" });
+});
+
+updateAvailability();
