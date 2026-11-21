@@ -93,9 +93,17 @@ const AV_COLORS = [["#6d28d9","#f7c948"],["#1d6fe0","#6d28d9"],["#f7c948","#1d6f
 
 /* ---------- Nav tabs ---------- */
 const navToggle = $("#navToggle"), navTabs = $("#navTabs");
-navToggle.addEventListener("click", () => navTabs.classList.toggle("open"));
+navToggle.addEventListener("click", () => {
+  const isOpen = navTabs.classList.toggle("open");
+  navToggle.setAttribute("aria-expanded", String(isOpen));
+  navToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+});
 navTabs.addEventListener("click", e => {
-  if (e.target.classList.contains("tab")) navTabs.classList.remove("open");
+  if (e.target.classList.contains("tab")) {
+    navTabs.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+    navToggle.setAttribute("aria-label", "Open navigation menu");
+  }
 });
 const tabLinks = $$(".tab");
 const sections = [...tabLinks].map(a => $(a.getAttribute("href"))).filter(Boolean);
